@@ -22,7 +22,7 @@ from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from datetime import datetime
 
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     service = Service("/usr/local/bin/chromedriver") 
