@@ -5,6 +5,8 @@ import gspread
 import openpyxl
 import tempfile
 import time
+import base64
+import json
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -144,12 +146,13 @@ def get_logiwa_file():
 
 
 def get_googlesheets_file():
-    SERVICE_ACCOUNT_FILE = os.path.join(os.path.dirname(__file__), 'shippedorders-db4a9769fb29.json')
+    service_account_json = base64.b64decode(os.getenv("SERVICE_ACCOUNT_FILE")).decode("utf-8")
+    SERVICE_ACCOUNT_FILE = json.loads(service_account_json)
 
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 
             'https://www.googleapis.com/auth/drive']
 
-    creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    creds = Credentials.from_service_account_info(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 
     client = gspread.authorize(creds)
 
@@ -236,7 +239,9 @@ def send_email_with_matches(matched_orders):
     </html>
     """
 
-    receiver_email = "buenos-aires@the5411.com"
+    #receiver_email = ["buenos-aires@the5411.com", "jcordero@the5411.com", "isalazar@the5411.com"]
+    #receiver_email = ", ".join(receiver_email)
+    receiver_email = "jcordero@the5411.com"
     subject = "🚀 Pending orders to ship in Logiwa:"
 
     message = MIMEMultipart()
