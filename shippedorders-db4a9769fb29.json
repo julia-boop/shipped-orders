@@ -1,13 +1,1 @@
-{
-  "type": "service_account",
-  "project_id": "shippedorders",
-  "private_key_id": "db4a9769fb299b6d3e6decf965cea4f35d62a927",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDdKM1N4REbN5TT\n5HnQctd0+AskbLdqwJaYW5z3OTCmVR7OXEtBP6RtdvbB1aKYVVUz8yqyAFefXpCu\ncbL9t2okoK6VfBLuI9xbVD0qlTv529UcBYqcRdwSXHsc1qfvYPp7+//scpBaYNSn\nsBFLpTag41aIU0Z4xMheOc3GwUDNI9g5MitMmHcRwkhsfhfNdGyzUczUmKa2BeRh\n0vfZ5qG2RzbNkDkSDAVo31o0sWMm+PgYzKieufE6CPoxI+bnCQ7yxZaRR+KxxkHM\nn0vj2g6YBtI38B+I2aRkVY9eafcIp0dG9XjsFDod8ka/gKYBg/ZmIhUUzhBr302I\nFwzXcb9FAgMBAAECggEABT58b8ZQc4bD3qpiQREYDsv656g0STG74Gz7sdkHUEpg\naqBBoJBzw6y4eSwpqNcNKCgx8PqVGVBSufA0QFPjDm9I9H52rHLpPLkooiPbwjb2\nPK3c9YuqhjzvJmXooYJ5LgtxrBejWKFHKZrBLjwCqZn6aU0gNKjl32YbfQUEFlkh\n9KEu9nUYfPfpyV3XLrRxUqXoexpWHXJDpfWGF2vN4e9yeutWUviDum+Sv8MoySMg\n3Xp6thc9dATHmjx4LQOwZydaPyR4f/XOqQQz1bWp0X+7TVGVxRMJ43/4Qv/ClX+P\nW9vxIuoL1hZGHgXN51eNNwgfuPzW8Fb5q3ZU5AZ9mQKBgQDuctakjn/DQungp5TS\nZLoS7tDJlhs3pRE3hsl5Qk2F/KFycgkj7D0HCx3Q1VRMlqtnrXBHZHMRXH+gMp+Y\nHO6chGPelxWO+/jBFb6xhu632O2NtC27bLewBD5X7+LTG04+WmM4sP7oiP1o6kec\nd7iG5lrT4BmWzpeHK3dsyRFlcwKBgQDtcC13pWBfH3/7fc5+UWWr9LvNX6HN/XRU\nhS5jFx79II2lp/7OQqn6QYlUxDJ+9SK7evQ8O5pOXFhSlBXd3ZB+e5nT5qO5cjXX\n44shIbJq+3ddYa10eZHRCHlwRVcbJ0+rHsQqrI5w3Bq44hXLvPPeb2njyDdJpYgF\nOA1IBzraZwKBgQCa/cxlRDbpzgnFvEgxBcYpXlAaaFaiscniJNu61Q0dBZxPjq5A\nSmNUu7YSs0fLTLh3eLYdwb5Fz7EpiR5RuqSi2i8sVVpvCXukziSYslNi7z9iN3bu\nd/liETAQ6t2uSPZv80LBa9MVhU3qrzYDD5LDJOJvDCC19O1rsCY9cOi83wKBgHCa\nCnX7T8DMx30VJKBzKaxq28WB3NI7qLeMkXscs+2HSqWNDiHzK3krK12vzeK3jkkq\n/jiya3NOB/ThlZ0qPiQ9qa38axi/ORmxJ4IG4P4rU2hNslzSanyfcDf2KmEOO5ID\nfTRfsQ2E1IdpcLy2V1DdtXH4uX+LqP4QnvvRse9xAoGBAMNTEGwLOj3BZUCjspL2\n5wIGOIchlOmPQyuAppj4miI2rjKvNmW2Ov46OmH8SwnGuYxvFnt846xt0mnbp/qk\nweg3AcLLFSaO6+dlZ0lIzXV2T46swE90Q0hxIR47zttgs/txctF58U0+nknphVe6\nmK0z9zhKqobKHWw1CKPlgkIH\n-----END PRIVATE KEY-----\n",
-  "client_email": "sheets-access@shippedorders.iam.gserviceaccount.com",
-  "client_id": "103187802643437586010",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sheets-access%40shippedorders.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
+
