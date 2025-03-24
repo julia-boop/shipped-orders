@@ -20,7 +20,7 @@ from google.oauth2.service_account import Credentials
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 #For development
@@ -261,5 +261,15 @@ def send_email_with_matches(matched_orders):
 
     print("✅ Email sent successfully!")
 
-matches = compare_files()
-send_email_with_matches(matches)
+
+def is_last_weekday_of_month():
+    today = datetime.today()
+    tomorrow = today + timedelta(days=1)
+    return today.weekday() < 5 and tomorrow.day == 1
+
+if datetime.today().weekday() == 4 or is_last_weekday_of_month():
+    print("✅ Running the script...")
+    matches = compare_files()
+    send_email_with_matches(matches)
+else:
+    print("⏳ Not Friday or last weekday of the month. Exiting...")
