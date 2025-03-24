@@ -22,14 +22,15 @@ from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from datetime import datetime
 
-DEBUG = False
 
-if DEBUG:
-    service = Service("/usr/local/bin/chromedriver") 
-else:
-    import chromedriver_autoinstaller
-    chromedriver_path = chromedriver_autoinstaller.install()
-    service = Service(chromedriver_path)
+#For development
+# service = Service("/usr/local/bin/chromedriver") 
+
+
+#For production
+import chromedriver_autoinstaller
+chromedriver_path = chromedriver_autoinstaller.install()
+service = Service(chromedriver_path)
 
 user_data_dir = tempfile.mkdtemp()
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -38,7 +39,7 @@ os.makedirs(download_path, exist_ok=True)
 
 
 chrome_options = Options()
-#chrome_options.add_argument("--headless")  
+chrome_options.add_argument("--headless")  
 chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
@@ -50,7 +51,6 @@ chrome_options.add_experimental_option("prefs", {
     "safebrowsing.enabled": True               
 })
 
-service = Service("/usr/local/bin/chromedriver")
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
