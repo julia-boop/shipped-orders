@@ -131,7 +131,7 @@ def get_logiwa_file(date_entry=None):
     date_input = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[2]/div/div[5]/div[2]/div/input")
     first_day = datetime.today().replace(day=1)
     today = datetime.today()
-    date_range = date_entry if date_entry else f"{first_day.strftime('%m/%d/%Y')} - {today.strftime('%m/%d/%Y')}"
+    date_range = date_entry if date_entry else f"{first_day.strftime('%m.%d.%Y')} 00:00:00 - {today.strftime('%m.%d.%Y')} 00:00:00"
     print(date_range) 
     date_input.send_keys(date_range)
 
@@ -233,12 +233,13 @@ def compare_files(date_entry=None):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def send_email_with_matches(matched_orders):
+    row_count = len(matched_orders)
     html_table = matched_orders.to_html(index=False, escape=False, border=0)
 
     html_content = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background-color: #0c1c24; padding: 20px;">
-            <h1 style="color: white; font-size: 24px; text-align: center;">Pending orders:</h1>
+            <h1 style="color: white; font-size: 24px; text-align: center;"> {row_count} Pending orders:</h1>
             <table style="width: 80%; max-width: 600px; margin: 0 auto; border-collapse: collapse; background: #fff; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); border-radius: 10px; overflow: hidden;">
                 <tr style="background-color: #182937; color: white;">
                     <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Client</th>
