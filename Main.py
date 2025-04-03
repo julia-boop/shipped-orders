@@ -9,8 +9,10 @@ import openpyxl
 import tempfile
 import time
 import base64
+import re
 import json
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -120,18 +122,11 @@ def get_logiwa_file(date_entry=None):
 
     time.sleep(3)
 
-    dropdown_btn = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[7]/div[2]/div/button")
-    dropdown_btn.click()
-    for position in [3, 4, 5, 6, 7]:
-        option = driver.find_element(By.XPATH, f"/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[7]/div[2]/div/ul/li[{position}]/a/label")
-        option.click()
-    
-    time.sleep(3)
-
     date_input = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[2]/div/div[5]/div[2]/div/input")
     first_day = datetime.today().replace(day=1)
     today = datetime.today()
-    date_range = date_entry if date_entry else f"{first_day.strftime('%m.%d.%Y')} 00:00:00 - {today.strftime('%m.%d.%Y')} 00:00:00"
+    first_day_prev_month = today.replace(day=1) - relativedelta(months=1)
+    date_range = date_entry if date_entry else f"01.01.2025 00:00:00 - {today.strftime('%m.%d.%Y')} 00:00:00"
     print(date_range) 
     date_input.send_keys(date_range)
 
@@ -145,7 +140,7 @@ def get_logiwa_file(date_entry=None):
     button_excel = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/div/div[5]/div/table/tbody/tr/td[1]/table/tbody/tr/td[1]/div/span")
     button_excel.click()
 
-    time.sleep(20)
+    time.sleep(120)
 
     driver.quit() 
 
@@ -175,9 +170,9 @@ def get_googlesheets_file():
 
     client = gspread.authorize(creds)
 
-    spreadsheet = client.open("Prioridad de Ordenes")
+    spreadsheet = client.open("Order History")
 
-    sheet = spreadsheet.worksheet("Ordenes")  
+    sheet = spreadsheet.worksheet("Order History")  
 
     data = sheet.get_all_values()
 
@@ -209,23 +204,241 @@ def compare_files(date_entry=None):
     df_lw = pd.read_excel(file_lw)
 
     df_gs = df_gs[df_gs['Status'] == 'Shipped']
-    df_gs['Order'] = df_gs['Order'].str.strip().replace('', None)       
-    df_gs['PO#'] = df_gs['PO#'].str.strip().replace('', None)
-    df_lw['Logiwa Order #'] = df_lw['Logiwa Order #'].astype(str).str.strip()
-    df_lw['Customer Order #'] = df_lw['Customer Order #'].astype(str).str.strip()
+    df_lw = df_lw[(df_lw['Order Status'] != 'Shipped') & (df_lw['Operation Status'] != 'Shipped')]
+
+    for col in ['Order', 'PO#', 'DC/Store']:
+        df_gs[col] = df_gs[col].astype(str).str.strip()
+        df_gs[col] = df_gs[col].astype(str).str.replace('#', '', regex=False).str.strip()
+
+    for col in ['Logiwa Order #', 'Customer Order #']:
+        df_lw[col] = df_lw[col].astype(str).str.strip()
+        df_lw[col] = df_lw[col].astype(str).str.replace('#', '', regex=False).str.strip()
 
     matches = []
-    matches.append(df_gs.merge(df_lw, left_on='Order', right_on='Logiwa Order #', how='inner'))
-    matches.append(df_gs.merge(df_lw, left_on='Order', right_on='Customer Order #', how='inner'))
-    matches.append(df_gs.merge(df_lw, left_on='PO#', right_on='Logiwa Order #', how='inner'))
-    matches.append(df_gs.merge(df_lw, left_on='PO#', right_on='Customer Order #', how='inner'))
-    matches.append(df_gs.merge(df_lw, left_on='DC/Store', right_on='Logiwa Order #', how='inner'))
-    matches.append(df_gs.merge(df_lw, left_on='DC/Store', right_on='Customer Order #', how='inner'))
+    no_matches = []
 
-    final_match = pd.concat(matches).drop_duplicates()
-    final_match = final_match.sort_values(by="Client_x", ascending=True)
+    matched_logiwa_indices = set() 
 
-    print(final_match)
+    for lw_idx, lw_row in df_lw.iterrows():
+        if lw_idx in matched_logiwa_indices:
+            continue
+
+        logiwa_order = lw_row['Logiwa Order #']
+        customer_order = lw_row['Customer Order #']
+        match_found = False
+
+        df_gs['order_dc'] = df_gs['Order'] + '-' + df_gs['DC/Store']
+        df_gs['po_dc'] = df_gs['PO#'] + '-' + df_gs['DC/Store']
+        df_gs['hashpo_dc'] = df_gs['PO#'] + '-' + df_gs['DC/Store']
+        df_gs['order_dc_cus'] = df_gs['Order'] + '-' + df_gs['DC/Store']
+
+
+        match_df = df_gs[df_gs['Order'].str.contains(re.escape(str(logiwa_order)), case=False, na=False)]
+        if len(match_df) == 1:
+            match = match_df.iloc[0]
+            if str(lw_row['Client']).strip().lower() not in str(match['Client']).strip().lower():
+                continue
+            combined_row = {
+                'Client': match['Client'],  
+                'Customer': match['Customer'],
+                'Order': match['Order'],
+                '#PO': match['PO#'],
+                'Tracker Status': match['Status'],
+                'Tracker Units': match['Units Shipped'],
+                'Logiwa Client': lw_row['Client'],
+                'Logiwa Order #': lw_row['Logiwa Order #'],
+                'Customer Order #': lw_row['Customer Order #'],
+                'Logiwa Status': lw_row['Order Status'],
+                'Logiwa Units': lw_row['Nof Products'],
+            }
+            matches.append(pd.DataFrame([combined_row]))
+            print(f"Matched at 1 {combined_row}")
+            matched_logiwa_indices.add(lw_idx)
+            match_found = True
+
+        elif len(match_df) > 1:
+            match_df2 = df_gs[df_gs['order_dc'].str.contains(re.escape(str(logiwa_order)), case=False, na=False)]
+            if len(match_df2) == 1:
+                match = match_df2.iloc[0]
+                if str(lw_row['Client']).strip().lower() not in str(match['Client']).strip().lower():
+                    continue
+                combined_row = {
+                    'Client': match['Client'],  
+                    'Customer': match['Customer'],
+                    'Order': match['Order'],
+                    '#PO': match['PO#'],
+                    'Tracker Status': match['Status'],
+                    'Tracker Units': match['Units Shipped'],
+                    'Logiwa Client': lw_row['Client'],
+                    'Logiwa Order #': lw_row['Logiwa Order #'],
+                    'Customer Order #': lw_row['Customer Order #'],
+                    'Logiwa Status': lw_row['Order Status'],
+                    'Logiwa Units': lw_row['Nof Products'],
+                }
+                matches.append(pd.DataFrame([combined_row]))
+                print(f"Matched at 1.1 {combined_row}")
+                matched_logiwa_indices.add(lw_idx)
+                match_found = True
+
+        if not match_found:
+            match_df = df_gs[df_gs['PO#'].str.contains(re.escape(str(logiwa_order)), case=False, na=False)]
+            if len(match_df) == 1:
+                match = match_df.iloc[0]
+                if str(lw_row['Client']).strip().lower() not in str(match['Client']).strip().lower():
+                    continue
+                combined_row = {
+                    'Client': match['Client'], 
+                    'Customer': match['Customer'],
+                    'Order': match['Order'],
+                    '#PO': match['PO#'],
+                    'Tracker Status': match['Status'],
+                    'Tracker Units': match['Units Shipped'],
+                    'Logiwa Client': lw_row['Client'],
+                    'Logiwa Order #': lw_row['Logiwa Order #'],
+                    'Customer Order #': lw_row['Customer Order #'],
+                    'Logiwa Status': lw_row['Order Status'],
+                    'Logiwa Units': lw_row['Nof Products'],
+                }
+                matches.append(pd.DataFrame([combined_row]))
+                print(f"Matched at 2 {combined_row}")
+                matched_logiwa_indices.add(lw_idx)
+                match_found = True
+
+            elif len(match_df) > 1:
+                match_df2 = df_gs[df_gs['po_dc'].str.contains(re.escape(str(logiwa_order)), case=False, na=False)]
+                if len(match_df2) == 1:
+                    match = match_df2.iloc[0]
+                    if str(lw_row['Client']).strip().lower() not in str(match['Client']).strip().lower():
+                        continue
+                    combined_row = {
+                        'Client': match['Client'],  
+                        'Customer': match['Customer'],
+                        'Order': match['Order'],
+                        '#PO': match['PO#'],
+                        'Tracker Status': match['Status'],
+                        'Tracker Units': match['Units Shipped'],
+                        'Logiwa Client': lw_row['Client'],
+                        'Logiwa Order #': lw_row['Logiwa Order #'],
+                        'Customer Order #': lw_row['Customer Order #'],
+                        'Logiwa Status': lw_row['Order Status'],
+                        'Logiwa Units': lw_row['Nof Products'],
+                    }
+                    matches.append(pd.DataFrame([combined_row]))
+                    print(f"Matched at 2.1 {combined_row}")
+                    matched_logiwa_indices.add(lw_idx)
+                    match_found = True
+
+        if not match_found:
+            match_df = df_gs[df_gs['PO#'].str.contains(re.escape(str(customer_order)), case=False, na=False)]
+            if len(match_df) == 1:
+                match = match_df.iloc[0]
+                if str(lw_row['Client']).strip().lower() not in str(match['Client']).strip().lower():
+                    continue
+                combined_row = {
+                    'Client': match['Client'], 
+                    'Customer': match['Customer'],
+                    'Order': match['Order'],
+                    '#PO': match['PO#'],
+                    'Tracker Status': match['Status'],
+                    'Tracker Units': match['Units Shipped'],
+                    'Logiwa Client': lw_row['Client'],
+                    'Logiwa Order #': lw_row['Logiwa Order #'],
+                    'Customer Order #': lw_row['Customer Order #'],
+                    'Logiwa Status': lw_row['Order Status'],
+                    'Logiwa Units': lw_row['Nof Products'],
+                }
+                matches.append(pd.DataFrame([combined_row]))
+                print(f"Matched at 3 {combined_row}")
+                matched_logiwa_indices.add(lw_idx)
+                match_found = True
+
+            elif len(match_df) > 1:
+                match_df2 = df_gs[df_gs['hashpo_dc'].str.contains(re.escape(str(customer_order)), case=False, na=False)]
+                if len(match_df2) == 1:
+                    match = match_df2.iloc[0]
+                    if str(lw_row['Client']).strip().lower() not in str(match['Client']).strip().lower():
+                        continue
+                    combined_row = {
+                        'Client': match['Client'],  
+                        'Customer': match['Customer'],
+                        'Order': match['Order'],
+                        '#PO': match['PO#'],
+                        'Tracker Status': match['Status'],
+                        'Tracker Units': match['Units Shipped'],
+                        'Logiwa Client': lw_row['Client'],
+                        'Logiwa Order #': lw_row['Logiwa Order #'],
+                        'Customer Order #': lw_row['Customer Order #'],
+                        'Logiwa Status': lw_row['Order Status'],
+                        'Logiwa Units': lw_row['Nof Products'],
+                    }
+                    matches.append(pd.DataFrame([combined_row]))
+                    print(f"Matched at 3.1 {combined_row}")
+                    matched_logiwa_indices.add(lw_idx)
+                    match_found = True
+
+        if not match_found:
+            match_df = df_gs[df_gs['Order'].str.contains(re.escape(str(customer_order)), case=False, na=False)]
+            if len(match_df) == 1:
+                match = match_df.iloc[0]
+                if str(lw_row['Client']).strip().lower() not in str(match['Client']).strip().lower():
+                    continue
+                combined_row = {
+                    'Client': match['Client'],  
+                    'Customer': match['Customer'],
+                    'Order': match['Order'],
+                    '#PO': match['PO#'],
+                    'Tracker Status': match['Status'],
+                    'Tracker Units': match['Units Shipped'],
+                    'Logiwa Client': lw_row['Client'],
+                    'Logiwa Order #': lw_row['Logiwa Order #'],
+                    'Customer Order #': lw_row['Customer Order #'],
+                    'Logiwa Status': lw_row['Order Status'],
+                    'Logiwa Units': lw_row['Nof Products'],
+                }
+                matches.append(pd.DataFrame([combined_row]))
+                print(f"Matched 4 {combined_row}")
+                matched_logiwa_indices.add(lw_idx)
+                match_found = True
+        
+        elif len(match_df) > 1:
+            match_df2 = df_gs[df_gs['order_dc_cus'].str.contains(re.escape(str(customer_order)), case=False, na=False)]
+            if len(match_df2) == 1:
+                match = match_df2.iloc[0]
+                if str(lw_row['Client']).strip().lower() not in str(match['Client']).strip().lower():
+                    continue
+                combined_row = {
+                    'Client': match['Client'],  
+                    'Customer': match['Customer'],
+                    'Order': match['Order'],
+                    '#PO': match['PO#'],
+                    'Tracker Status': match['Status'],
+                    'Tracker Units': match['Units Shipped'],
+                    'Logiwa Client': lw_row['Client'],
+                    'Logiwa Order #': lw_row['Logiwa Order #'],
+                    'Customer Order #': lw_row['Customer Order #'],
+                    'Logiwa Status': lw_row['Order Status'],
+                    'Logiwa Units': lw_row['Nof Products'],
+                }
+                matches.append(pd.DataFrame([combined_row]))
+                print(f"Matched at 4.1 {combined_row}")
+                matched_logiwa_indices.add(lw_idx)
+                match_found = True
+
+
+        if not match_found:
+            no_matches.append(lw_row)
+
+    if matches:
+        final_match = pd.concat(matches, ignore_index=True)
+    else:
+        final_match = pd.DataFrame()
+    
+    final_match = final_match.sort_values(by="Client", ascending=True)
+    final_match['Tracker Units'] = pd.to_numeric(final_match['Tracker Units'], errors='coerce')
+    final_match['Logiwa Units'] = pd.to_numeric(final_match['Logiwa Units'], errors='coerce')
+    final_match['Difference in Units'] = final_match['Tracker Units'] - final_match['Logiwa Units']
+    final_match['Difference in Units'] = final_match['Difference in Units'].abs()
+
     return final_match
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
