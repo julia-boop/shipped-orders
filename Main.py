@@ -72,6 +72,20 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+def wait_for_download_to_finish(download_path, timeout=1200):
+    """
+    Waits until the download folder has no .crdownload or .part files (indicating download in progress).
+    """
+    seconds = 0
+    while seconds < timeout:
+        files = os.listdir(download_path)
+        if any(file.endswith(('.crdownload', '.part')) for file in files):
+            time.sleep(1)
+            seconds += 1
+        else:
+            return True
+    raise TimeoutError("Download did not complete within timeout.")
+
 def get_latest_file(directory):
     files = [os.path.join(directory, f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     if not files:
@@ -120,7 +134,7 @@ def get_logiwa_file(date_entry=None):
     
     driver.get("https://app.logiwa.com/en/WMS/WarehouseOrder")
 
-    time.sleep(3)
+    time.sleep(20)
 
     date_input = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[2]/div/div[5]/div[2]/div/input")
     first_day = datetime.today().replace(day=1)
@@ -130,12 +144,12 @@ def get_logiwa_file(date_entry=None):
     print(date_range) 
     date_input.send_keys(date_range)
 
-    time.sleep(3)
+    time.sleep(10)
     
     button_search = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[1]/button[1]")
     button_search.click()
 
-    time.sleep(3)
+    time.sleep(10)
 
     button_excel = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/div/div[5]/div/table/tbody/tr/td[1]/table/tbody/tr/td[1]/div/span")
     button_excel.click()
@@ -152,6 +166,7 @@ def get_logiwa_file(date_entry=None):
     else:
         print(f"No files found in the directory {download_path}")
         return
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
