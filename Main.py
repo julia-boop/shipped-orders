@@ -500,30 +500,35 @@ def send_email_with_matches(matched_orders):
 #CONDITIONAL CALLING OF FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+matches = compare_files()
+send_email_with_matches(matches)
 
-today = datetime.today()
+# Uncomment the following lines to run the script only on specific days
 
-def is_last_weekday_of_month():
-    tomorrow = today + timedelta(days=1)
-    return today.weekday() < 5 and tomorrow.day == 1
 
-def is_first_weekday_of_month():
-    day = today.day
-    weekday = today.weekday()
-    return day <= 3 and weekday < 5
+# today = datetime.today()
 
-if today.weekday() == 4 or is_last_weekday_of_month():
-    print("✅ Running the script (Friday or last weekday)...")
-    matches = compare_files()
-    send_email_with_matches(matches)
-elif is_first_weekday_of_month():
-    print("✅ Running the script (first weekday of the month)...")
-    last_day_of_last_month = today - timedelta(days=1)
-    first_day_of_last_month = last_day_of_last_month.replace(day=1)
-    start = first_day_of_last_month.strftime("%m.%d.%Y") + " 00:00:00"
-    end = last_day_of_last_month.strftime("%m.%d.%Y") + " 00:00:00"
-    date_entry = f"{start} - {end}"
-    matches = compare_files(date_entry)
-    send_email_with_matches(matches)
-else:
-    print("⏳ Not a trigger day. Exiting...")
+# def is_last_weekday_of_month():
+#     tomorrow = today + timedelta(days=1)
+#     return today.weekday() < 5 and tomorrow.day == 1
+
+# def is_first_weekday_of_month():
+#     day = today.day
+#     weekday = today.weekday()
+#     return day <= 3 and weekday < 5
+
+# if today.weekday() == 4 or is_last_weekday_of_month():
+#     print("✅ Running the script (Friday or last weekday)...")
+#     matches = compare_files()
+#     send_email_with_matches(matches)
+# elif is_first_weekday_of_month():
+#     print("✅ Running the script (first weekday of the month)...")
+#     last_day_of_last_month = today - timedelta(days=1)
+#     first_day_of_last_month = last_day_of_last_month.replace(day=1)
+#     start = first_day_of_last_month.strftime("%m.%d.%Y") + " 00:00:00"
+#     end = last_day_of_last_month.strftime("%m.%d.%Y") + " 00:00:00"
+#     date_entry = f"{start} - {end}"
+#     matches = compare_files(date_entry)
+#     send_email_with_matches(matches)
+# else:
+#     print("⏳ Not a trigger day. Exiting...")
