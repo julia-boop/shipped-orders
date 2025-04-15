@@ -477,7 +477,7 @@ def compare_files(date_entry=None):
     final_match['Tracker Units'] = pd.to_numeric(final_match['Tracker Units'], errors='coerce')
     final_match['Logiwa Units'] = pd.to_numeric(final_match['Logiwa Units'], errors='coerce')
     final_match['Difference in Units'] = final_match['Tracker Units'] - final_match['Logiwa Units']
-    final_match['Difference in Units'] = final_match['Difference in Units'].abs()
+    final_match['Difference in Units'] = final_match['Difference'].abs()
 
     return final_match
 
@@ -502,11 +502,19 @@ def send_email_with_matches(matched_orders):
                 </tr>
                 {''.join(
                     f"<tr style='background-color: #f9f9f9;'>"
-                    f"<td style='padding: 12px; border-bottom: 1px solid #ddd;'>{row['Client_x']}</td>"
-                    f"<td style='padding: 12px; border-bottom: 1px solid #ddd;'>{row['Customer']}</td>"
-                    f"<td style='padding: 12px; border-bottom: 1px solid #ddd;'>{row['Order']}</td>"
-                    f"<td style='padding: 12px; border-bottom: 1px solid #ddd;'>{row['PO#']}</td>"
-                    f"</tr>" for _, row in matched_orders.iterrows()
+                    + "".join(
+                        f"<td style='padding: 12px; border-bottom: 1px solid #ddd;'>{'' if pd.isna(row.get(col)) or str(row.get(col)).strip() == '' else row.get(col)}</td>"
+                        for col in ['Client', 'Customer', 'Order', '#PO', 'Logiwa Order #']
+                    )
+                    + f"<td style='padding: 12px; border-bottom: 1px solid #ddd;'>{'' if pd.isna(row.get('Logiwa Units')) or str(row.get('Logiwa Units')).strip() == '' else int(row.get('Logiwa Units'))}</td>"
+                    + f"<td style='padding: 12px; border-bottom: 1px solid #ddd;'>{'' if pd.isna(row.get('Tracker Units')) or str(row.get('Tracker Units')).strip() == '' else int(row.get('Tracker Units'))}</td>"
+                    + (
+                        f"<td style='padding: 12px; border-bottom: 1px solid #ddd; color: #DAA520;'>Incomplete</td>"
+                        if pd.isna(row.get('Difference in Units')) or str(row.get('Difference in Units')).strip() == ''
+                        else f"<td style='padding: 12px; border-bottom: 1px solid #ddd; color: {'red' if row['Difference in Units'] != 0 else 'black'};'>{int(row['Difference in Units'])}</td>"
+                    )
+                    + "</tr>"
+                    for _, row in matched_orders.iterrows()
                 )}
             </table>
             <img src="https://www.the5411.com/wp-content/uploads/2024/03/5411-Distribution-Logo-1.png" 
@@ -533,6 +541,7 @@ def send_email_with_matches(matched_orders):
         server.sendmail(os.getenv("SENDER_EMAIL"), receiver_email, message.as_string())
 
     print("✅ Email sent successfully!")
+
 
 
 
