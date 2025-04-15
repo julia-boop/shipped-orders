@@ -142,7 +142,7 @@ def get_logiwa_file(date_entry=None):
         option = driver.find_element(By.XPATH, f"/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[7]/div[2]/div/ul/li[{position}]/a/label")
         option.click()
 
-    time.sleep(3)
+    time.sleep(10)
 
     dropdown_btn_2 = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[16]/div[2]/div/button")
     dropdown_btn_2.click()
@@ -150,7 +150,7 @@ def get_logiwa_file(date_entry=None):
         option = driver.find_element(By.XPATH, f"/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[16]/div[2]/div/ul/li[{position}]/a/label")
         option.click()
     
-    time.sleep(3)
+    time.sleep(10)
 
     date_input = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[2]/div/div[5]/div[2]/div/input")
     first_day = datetime.today().replace(day=1)
