@@ -476,8 +476,8 @@ def compare_files(date_entry=None):
     final_match = final_match.sort_values(by="Client", ascending=True)
     final_match['Tracker Units'] = pd.to_numeric(final_match['Tracker Units'], errors='coerce')
     final_match['Logiwa Units'] = pd.to_numeric(final_match['Logiwa Units'], errors='coerce')
-    final_match['Difference in Units'] = final_match['Tracker Units'] - final_match['Logiwa Units']
-    final_match['Difference in Units'] = final_match['Difference'].abs()
+    final_match['Difference'] = final_match['Tracker Units'] - final_match['Logiwa Units']
+    final_match['Difference'] = final_match['Difference'].abs()
 
     return final_match
 
@@ -499,6 +499,10 @@ def send_email_with_matches(matched_orders):
                     <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Customer</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Order</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">#PO</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Logiwa Order</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Logiwa Units</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Tracker Units</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Difference</th>
                 </tr>
                 {''.join(
                     f"<tr style='background-color: #f9f9f9;'>"
@@ -510,8 +514,8 @@ def send_email_with_matches(matched_orders):
                     + f"<td style='padding: 12px; border-bottom: 1px solid #ddd;'>{'' if pd.isna(row.get('Tracker Units')) or str(row.get('Tracker Units')).strip() == '' else int(row.get('Tracker Units'))}</td>"
                     + (
                         f"<td style='padding: 12px; border-bottom: 1px solid #ddd; color: #DAA520;'>Incomplete</td>"
-                        if pd.isna(row.get('Difference in Units')) or str(row.get('Difference in Units')).strip() == ''
-                        else f"<td style='padding: 12px; border-bottom: 1px solid #ddd; color: {'red' if row['Difference in Units'] != 0 else 'black'};'>{int(row['Difference in Units'])}</td>"
+                        if pd.isna(row.get('Difference in Units')) or str(row.get('Difference')).strip() == ''
+                        else f"<td style='padding: 12px; border-bottom: 1px solid #ddd; color: {'red' if row['Difference'] != 0 else 'black'};'>{int(row['Difference in Units'])}</td>"
                     )
                     + "</tr>"
                     for _, row in matched_orders.iterrows()
