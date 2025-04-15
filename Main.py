@@ -488,6 +488,8 @@ def compare_files(date_entry=None):
 def send_email_with_matches(matched_orders):
     row_count = len(matched_orders)
     html_table = matched_orders.to_html(index=False, escape=False, border=0)
+    print("SMTP_SERVER:", os.getenv("SMTP_SERVER"))
+    print("SMTP_PORT:", os.getenv("SMTP_PORT"))
 
     html_content = f"""
     <html>
@@ -514,8 +516,12 @@ def send_email_with_matches(matched_orders):
                     + f"<td style='padding: 12px; border-bottom: 1px solid #ddd;'>{'' if pd.isna(row.get('Tracker Units')) or str(row.get('Tracker Units')).strip() == '' else int(row.get('Tracker Units'))}</td>"
                     + (
                         f"<td style='padding: 12px; border-bottom: 1px solid #ddd; color: #DAA520;'>Incomplete</td>"
-                        if pd.isna(row.get('Difference in Units')) or str(row.get('Difference')).strip() == ''
-                        else f"<td style='padding: 12px; border-bottom: 1px solid #ddd; color: {'red' if row['Difference'] != 0 else 'black'};'>{int(row['Difference in Units'])}</td>"
+                        if pd.isna(row.get('Difference in Units')) or str(row.get('Difference in Units')).strip() == ''
+                        else (
+                            f"<td style='padding: 12px; border-bottom: 1px solid #ddd; color: red;'>{int(row['Difference in Units'])}</td>"
+                            if row['Difference in Units'] != 0
+                            else f"<td style='padding: 12px; border-bottom: 1px solid #ddd; color: black;'>0</td>"
+                        )
                     )
                     + "</tr>"
                     for _, row in matched_orders.iterrows()
