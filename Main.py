@@ -168,8 +168,9 @@ def get_logiwa_file(date_entry=None):
     date_input.send_keys(date_range)
 
     time.sleep(10)
-    
     button_search = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[1]/button[1]")
+    driver.execute_script("arguments[0].scrollIntoView(true);", button_search)
+    time.sleep(1)
     button_search.click()
 
     time.sleep(10)
