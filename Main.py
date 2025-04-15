@@ -136,6 +136,22 @@ def get_logiwa_file(date_entry=None):
 
     time.sleep(20)
 
+    dropdown_btn = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[7]/div[2]/div/button")
+    dropdown_btn.click()
+    for position in [2, 8]:
+        option = driver.find_element(By.XPATH, f"/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[7]/div[2]/div/ul/li[{position}]/a/label")
+        option.click()
+
+    time.sleep(3)
+
+    dropdown_btn_2 = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[16]/div[2]/div/button")
+    dropdown_btn_2.click()
+    for position in [2, 17]:
+        option = driver.find_element(By.XPATH, f"/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[16]/div[2]/div/ul/li[{position}]/a/label")
+        option.click()
+    
+    time.sleep(3)
+
     date_input = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[2]/div/div[5]/div[2]/div/input")
     first_day = datetime.today().replace(day=1)
     today = datetime.today()
@@ -154,7 +170,7 @@ def get_logiwa_file(date_entry=None):
     button_excel = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/div/div[5]/div/table/tbody/tr/td[1]/table/tbody/tr/td[1]/div/span")
     button_excel.click()
 
-    time.sleep(120)
+    time.sleep(200)
 
     driver.quit() 
 
