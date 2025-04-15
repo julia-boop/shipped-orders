@@ -137,7 +137,10 @@ def get_logiwa_file(date_entry=None):
     time.sleep(20)
 
     dropdown_btn = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[7]/div[2]/div/button")
-    dropdown_btn.click()
+    wait = WebDriverWait(driver, 20)
+    dropdown_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[7]/div[2]/div/button")))
+    driver.execute_script("arguments[0].scrollIntoView(true);", dropdown_btn)
+    driver.execute_script("arguments[0].click();", dropdown_btn)
     for position in [2, 8]:
         option = driver.find_element(By.XPATH, f"/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[7]/div[2]/div/ul/li[{position}]/a/label")
         option.click()
@@ -145,7 +148,11 @@ def get_logiwa_file(date_entry=None):
     time.sleep(10)
 
     dropdown_btn_2 = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[16]/div[2]/div/button")
-    dropdown_btn_2.click()
+    wait = WebDriverWait(driver, 20)
+    dropdown_btn_2 = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[16]/div[2]/div/button")))
+    driver.execute_script("arguments[0].scrollIntoView(true);", dropdown_btn_2)
+    driver.execute_script("arguments[0].click();", dropdown_btn_2)
+
     for position in [2, 17]:
         option = driver.find_element(By.XPATH, f"/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/form/div/div[1]/div[2]/div[16]/div[2]/div/ul/li[{position}]/a/label")
         option.click()
@@ -167,8 +174,10 @@ def get_logiwa_file(date_entry=None):
 
     time.sleep(10)
 
-    button_excel = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/div/div[5]/div/table/tbody/tr/td[1]/table/tbody/tr/td[1]/div/span")
-    button_excel.click()
+    button_excel = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div[2]/div/div/div[2]/div[1]/div[1]/div[3]/div/div[5]/div/table/tbody/tr/td[1]/table/tbody/tr/td[1]/div/span")))
+    driver.execute_script("arguments[0].scrollIntoView(true);", button_excel)
+    driver.execute_script("arguments[0].click();", button_excel)
+
 
     time.sleep(200)
 
