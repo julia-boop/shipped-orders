@@ -478,6 +478,7 @@ def compare_files(date_entry=None):
     final_match['Logiwa Units'] = pd.to_numeric(final_match['Logiwa Units'], errors='coerce')
     final_match['Difference'] = final_match['Tracker Units'] - final_match['Logiwa Units']
     final_match['Difference'] = final_match['Difference'].abs()
+    print(final_match.head(20))
 
     return final_match
 
