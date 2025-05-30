@@ -24,6 +24,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from google.oauth2.service_account import Credentials
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+from io import BytesIO
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
@@ -541,11 +543,25 @@ def send_email_with_matches(matched_orders):
 
     message.attach(MIMEText(html_content, "html"))
 
+    excel_buffer = BytesIO()
+    matched_orders.to_excel(excel_buffer, index=False, engine='openpyxl')
+    excel_buffer.seek(0)
+
+    attachment = MIMEApplication(excel_buffer.read(), _subtype="xlsx")
+    attachment.add_header(
+        "Content-Disposition",
+        "attachment",
+        filename="PendingOrders.xlsx"
+    )
+    message.attach(attachment)
+
     with smtplib.SMTP_SSL(os.getenv("SMTP_SERVER"), int(os.getenv("SMTP_PORT"))) as server:
         server.login(os.getenv("SENDER_EMAIL"), os.getenv("EMAIL_PASSWORD"))  # Use App Password if 2FA is enabled
         server.sendmail(os.getenv("SENDER_EMAIL"), receiver_email, message.as_string())
 
     print("✅ Email sent successfully!")
+
+
 
 
 
